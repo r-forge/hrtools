@@ -1,0 +1,12 @@
+Package: HRTools
+Type: Package
+Version: 1.0
+Date: 2013/06/12
+Depends: R (>= 2.10.0), sp, raster, methods, deldir, ade4, adehabitatHR 
+Suggests: rgdal
+Title: Commodity functions for home range calculation
+Author: Damiano G. Preatoni, Francesco Bisi
+Maintainer: Damiano G. Preatoni <prea@uninsubria.it>
+Description: a set of commodity functions built on top of adehabitatHR package
+License: GPL
+URL: http://home.prea.net/
