@@ -18,9 +18,13 @@ sizeGrid <- function(xy, res=100, as=c("SpatialPixels","raster")) {
   as.what <- match.arg(as)
   prj <- proj4string(xy)
   ext <- extent(xy)
-  xsize <- ceiling((ext@xmax-ext@xmin) / res)
-  ysize <- ceiling((ext@ymax-ext@ymin) / res)
-  grid <- raster(ext, nrows=ysize, ncols=xsize, crs=CRS(prj))
+  # widen a tad (20%) the extent
+  xplus <- (ext@xmax-ext@xmin) * 1.1
+  yplus <- (ext@ymax-ext@ymin) * 1.1
+  extplus <- extent(c(ext@xmin-xplus,ext@xmax+xplus,ext@ymin-yplus,ext@ymax+yplus)) 
+  xsize <- ceiling((extplus@xmax-extplus@xmin) / res)
+  ysize <- ceiling((extplus@ymax-extplus@ymin) / res)
+  grid <- raster(extplus, nrows=ysize, ncols=xsize, crs=CRS(prj))
   res(grid) <- res
   values(grid) <- 1
   if(as.what=="SpatialPixels") {

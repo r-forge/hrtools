@@ -1,6 +1,6 @@
 #' Batch home range calculations.
 #'
-#' Driver function for batch homerenge calculations, replaces HR_cruncher.
+#' Driver function for batch homerenge calculations.
 #'
 #' @param xy An object inheriting the class \code{SpatialPoints} containing the x and y relocations of the animal. If \code{xy} inherits the class \code{SpatialPointsDataFrame}, it should contain a column whose values specify the identity of the animals for each relocation. If that column exists and is not named \code{ID}, its name must be specified using the \code{id} argument. If a \code{SpatialPoints} object is passed, it is assumed that all the relocations are from a single animal.
 #' @param method a string specifying the home range calculation method to be used. See Details for further specifications.
@@ -11,18 +11,39 @@
 #' @param unin the units of the relocations coordinates. Either "m" for meters (default) or "km" for kilometers.
 #' @param unout the units of the output areas. Either "m2" for square meters, "km2" for square kilometers or "ha" for hectares (default).
 #' @param boundary If not NULL, an object inheriting the class SpatialLines defining a barrier that cannot be crossed by the animals. See \code{kernelUD} for details.
-#' 
-#' @details Available methods (see \code{method} above) are: \code{mcp}, \code{href}, \code{lscv}, \code{hadj}, \code{clusthr}, \code{NNCH}.
+#' @return an object of \code{HRData} class, with its slots filled.
+#' @details Available methods (see \code{method} above) are: \code{mcp}, \code{href}, \code{lscv}, \code{hadj}.
 #' \itemize{
-#'   \item{\code{mcp}}{Minimum Convex Polygon, using \code{adehabitatHR} \code{mcp} function.}
-#'   \item{\code{href}}{kernel home range using \code{adehabitatHR} \code{kernelUD} function with "ad hoc" smoothing parameter \code{h}.}
-#'   \item{\code{lscv}}{kernel home range using \code{adehabitatHR} \code{kernelUD} function with least-squares cross validation to estimate \code{h} smoothing parameter.}
-#'   \item{\code{hadj}}{kernel home range using \code{adehabitatHR} \code{kernelUD} function with "adjusted" \code{h} as in Wauters et al. (2007).}
+#'   \item{\code{mcp}}{ Minimum Convex Polygon, using \code{adehabitatHR} \code{mcp} function.}
+#'   \item{\code{href}}{ kernel home range using \code{adehabitatHR} \code{kernelUD} function with "ad hoc" smoothing parameter \code{h}.}
+#'   \item{\code{lscv}}{ kernel home range using \code{adehabitatHR} \code{kernelUD} function with least-squares cross validation to estimate \code{h} smoothing parameter.}
+#'   \item{\code{hadj}}{ kernel home range using \code{adehabitatHR} \code{kernelUD} function with "adjusted" \code{h} as in Wauters et al. (2007).}
 #'   }
-#' @seealso \link{sizeGrid}, \link[adehabitatHR]{mcp}, \link[adehabitatHR]{kernelUD}
+#' @seealso \link{sizeGrid}, \link[adehabitatHR]{mcp}, \link[adehabitatHR]{kernelUD}, \link{HRData-class}
 #' @references Lucas A. Wauters, Damiano G. Preatoni, Ambrogio Molinari, Guido Tosi (2007).
 #' Radio-tracking squirrels: Performance of home range density and linkage estimators with small range and sample size.
-#' Ecological Modelling \strong{202(3-4)}: 333-344 \url{http://dx.doi.org/10.1016/j.ecolmodel.2006.11.001}.
+#' Ecological Modelling 202(3-4): 333-344 \url{http://dx.doi.org/10.1016/j.ecolmodel.2006.11.001}
+#' @examples
+#' data(squirrels)
+#' # size up a grid with 30 m cell size
+#' reference.grid <- sizeGrid(squirrels, res=30)
+#' 
+#' # plot reference grid and locations
+#' image(reference.grid, col='lightgray')
+#' plot(squirrels, col=seq(1:18), add=TRUE)
+#' 
+#' # define animal ID field
+#' idfield <- "TAG"
+#' 
+#' # define minumum number of fixes needed
+#' minfix <- 15
+#' 
+#' calculate mcp and hadj kernel (href and lscv kernels will be calculated implicitly)
+#' result <- HRCruncher(squirrels, method=c('mcp','hadj'), percent=95, grid=reference.grid, idfield=idfield, unin='m', unout='ha')
+#' 
+#' # save results as shapefile
+#' libaray(rgdal)
+#' writeOGR(result@@href@@geometry, dsn='/tmp', layer='test' , driver="ESRI Shapefile")
 HRCruncher <- function(xy, method=c("mcp","href","lscv","hadj"), grid=100, idfield=c("ID"), minfix=15, percent=95, unin=c("m","km"), unout=c("ha", "km2", "m2"), boundary=NULL) {
   # methods available in adehabitatHR, by input data type, in alphabetical order
   # input is a SpatialPoints or a SpatialPointsDataFrame:
