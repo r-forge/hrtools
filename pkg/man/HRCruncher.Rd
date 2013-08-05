@@ -3,9 +3,10 @@
 \title{Batch home range calculations.}
 \usage{
   HRCruncher(xy, method = c("mcp", "href", "lscv", "hadj"),
-    grid = 100, idfield = c("ID"), minfix = 15,
-    percent = 95, unin = c("m", "km"),
-    unout = c("ha", "km2", "m2"), boundary = NULL)
+    grid = 20, same4all = FALSE, sizeGrid = TRUE,
+    idfield = c("ID"), minfix = 15, percent = 95,
+    keepfields = NULL, unin = c("m", "km"),
+    unout = c("ha", "km2", "m2"), boundary = NULL, ...)
 }
 \arguments{
   \item{xy}{An object inheriting the class
@@ -23,11 +24,22 @@
   calculation method to be used. See Details for further
   specifications.}
 
-  \item{grid}{a number giving the \emph{cell size} (in
-  meters) of the grid on which the UD should be estimated.
-  Default is 100 m. Alternatively, this parameter may be an
-  object inheriting the class SpatialPixels, that can be
-  created using the \code{sizeGrid} function.}
+  \item{grid}{a number giving the \emph{cell size} (either
+  as number of cells or in meters) of the grid on which the
+  UD should be estimated. Alternatively, this parameter may
+  be an object inheriting the class SpatialPixels, that can
+  be created using the \code{sizeGrid} function.}
+
+  \item{same4all}{logical. If \code{TRUE}, the same grid
+  (see above) is used for all animals, if \code{FALSE}, for
+  each animal a reference grid will be calculated.}
+
+  \item{sizeGrid}{if \code{TRUE} (default) the UD
+  estimation grid (see \code{grid} and \code{same4all}
+  above) will be calculated using the \code{sizeGrid}
+  function, instead of partitioning the extent in a
+  \code{grid} x \code{grid} cells mesh, as "regular"
+  \code{adehabitatHR} kernels do.}
 
   \item{idfield}{the name of a column in \code{xy}
   corresponding to the identity of the animals for each
@@ -49,6 +61,12 @@
   for home range estimation (see \code{percent} parameter
   in \code{kernelUD} function).}
 
+  \item{keepfields}{a character vector (as from
+  \code{names}) with names of fields to be preserved in the
+  results. \code{idfield} is automatically kept. In case
+  some field has different values, the first appearing
+  value will be kept.}
+
   \item{unin}{the units of the relocations coordinates.
   Either "m" for meters (default) or "km" for kilometers.}
 
@@ -59,6 +77,9 @@
   \item{boundary}{If not NULL, an object inheriting the
   class SpatialLines defining a barrier that cannot be
   crossed by the animals. See \code{kernelUD} for details.}
+
+  \item{...}{other parameters, passed to \code{mcp} and/or
+  \code{kernelUD}.}
 }
 \value{
   an object of \code{HRData} class, with its slots filled.

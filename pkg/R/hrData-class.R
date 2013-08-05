@@ -48,6 +48,16 @@ setGeneric("getHR", function(object, ...) standardGeneric("getHR"))
 setMethod("getHR", "HRDataGeom", function(object) {
   return(object@geometry)
 })
+setGeneric("bindAttrs", function(object, attrs, by.x, by.y) standardGeneric("bindAttrs"))
+setMethod("bindAttrs", "HRDataGeom", function(object, attrs, by.x='id', by.y=NULL) {
+  # a data.frame is merged with the @data slot of a SP*DF like this:
+  # shape@data = data.frame(shape@data, OtherData[match(shape@data$IDS, OtherData$IDS),])
+  # we need both key fields coerced to character.
+  object@geometry@data$id <- as.character(object@geometry@data$id)
+  attrs[,by.y] <- as.character(attrs[,by.y])
+  object@geometry@data <- data.frame(object@geometry@data, attrs[match(object@geometry@data$id, attrs[,by.y]),])
+  return(object)
+})
 
 #### HRDataGeomUD, derived class, same as above plus an estUD ##################
 setClass("HRDataGeomUD", contains="HRDataGeom", representation(ud = "estUDm"))
